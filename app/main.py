@@ -4,6 +4,7 @@ import uvicorn
 from app.services.tratamento__vendedores import clean_sellers
 from app.routers import example_router
 from app.services.tratamento__produtos import clean_products
+from app.services.tratamento__pedidos import tratar_pedidos
 
 
 app = FastAPI(title="API O-Market - Tratamento de Itens")
@@ -15,6 +16,15 @@ def read_root():
 @app.get("/health", description="Verifica a saúde da API.")
 async def health_check():
     return {"status": "ok"}
+
+@app.get("/pedidos-tratados", description="Retorna base de pedidos tratada.")
+async def get_pedidos_tratados():
+
+    caminho_csv = "/app/data/[Júlia] DataLake - pedidos.csv"
+    df_tratado = tratar_pedidos(caminho_csv)
+    return df_tratado.head(10).to_dict(orient="records")
+
+app.include_router(example_router, prefix="/example", tags=["Example"])
 
 @app.get("/vendedores-tratados", description="Retorna base de vendedores tratada.")
 async def get_vendedores_tratados():
