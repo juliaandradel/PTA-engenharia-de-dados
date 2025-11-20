@@ -2,6 +2,8 @@ from fastapi import FastAPI
 import uvicorn
 from app.services.tratamento__vendedores import clean_sellers
 from app.routers import example_router
+from app.services.tratamento__produtos import clean_products
+
 
 app = FastAPI(
     title="API de Tratamento de Dados - Desafio 1",
@@ -26,3 +28,12 @@ async def get_vendedores_tratados():
     return df_tratado.head(10).to_dict(orient="records")
 
 app.include_router(example_router, prefix="/example", tags=["Example"])
+@app.get("/produtos-tratados", description="Retorna base de produtos tratada.")
+async def get_produtos_tratados():
+    caminho_csv = "/app/data/[Júlia] DataLake - produtos.csv"
+    df_tratado = clean_products(caminho_csv)
+    # Limita para as primeiras 10 linhas, igual ao endpoint de pedidos
+    return df_tratado.head(10).to_dict(orient="records")
+
+app.include_router(example_router, prefix="/example", tags=["Example"])
+
