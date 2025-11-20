@@ -4,14 +4,14 @@ import numpy as np
 def tratar_itens_pedidos(path_csv: str):
     print(f"Iniciando tratamento de Itens: {path_csv}")
     
-    # Lê o CSV direto do arquivo (Padrão JV)
+    # Lê o CSV direto do arquivo
     df = pd.read_csv(path_csv)
 
-    # A. TRATAMENTO DE PREÇO E FRETE (12,34 -> 12.34)
+    # A. TRATAMENTO DE PREÇO E FRETE (Correção de vírgula)
     cols_valores = ['price', 'freight_value']
     
     for col in cols_valores:
-        # Cria a coluna se não existir
+        # Garante que a coluna existe
         if col not in df.columns: 
             df[col] = np.nan
         
@@ -19,7 +19,7 @@ def tratar_itens_pedidos(path_csv: str):
         if df[col].dtype == 'object':
             df[col] = df[col].astype(str).str.replace(',', '.')
 
-        # Converte para número (float)
+        # Converte para float
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
         # Preenche nulos com Mediana

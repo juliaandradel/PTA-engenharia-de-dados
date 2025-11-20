@@ -1,28 +1,28 @@
 from fastapi import FastAPI
-import uvicorn
-from app.routers import example_router
-from app.services.tratamento__pedidos import tratar_pedidos
+from app.services.data_cleaning import tratar_itens_pedidos
 
-app = FastAPI(
-    title="API de Tratamento de Dados - Desafio 1",
-    description="API que recebe dados brutos, os trata e os devolve limpos.",
-    version="1.0.0"
-)
+app = FastAPI(title="API O-Market - Tratamento de Itens")
 
-@app.get("/", description="Mensagem de boas-vindas da API.")
-async def read_root():
-    return {"message": "Bem-vindo à API de Tratamento de Dados!"}
+@app.get("/")
+def read_root():
+    return {"status": "API Online 🚀"}
 
-@app.get("/health", description="Verifica a saúde da API.")
-async def health_check():
-    return {"status": "ok"}
-
-@app.get("/pedidos-tratados", description="Retorna base de pedidos tratada.")
-async def get_pedidos_tratados():
+# --- ROTA GET PARA ITENS PEDIDOS ---
+@app.get("/clean/items")
+def get_clean_items(arquivo: str = "itens_pedidos.csv"):
+    """
+    Rota GET para limpar itens de pedidos.
+    O arquivo deve estar dentro da pasta 'data/'.
+    """
+   
+    path_csv = f"data/{arquivo}"
     
-    caminho_csv = "/app/data/[Júlia] DataLake - pedidos.csv"
-    df_tratado = tratar_pedidos(caminho_csv)
-    return df_tratado.head(10).to_dict(orient="records")
+    print(f"Buscando arquivo em: {path_csv}")
 
-app.include_router(example_router, prefix="/example", tags=["Example"])
-
+    try:
+        # Chama a função de itens passando o caminho completo
+        df_limpo = tratar_itens_pedidos(path_csv)
+        # Retorna o JSON
+        return df_limpo.to_dict("records")
+    except Exception as e:
+        return {"status": "error", "message": f"Erro ao ler {path_csv}: {str(e)}"}
