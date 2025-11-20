@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 from app.services.data_cleaning import tratar_itens_pedidos
+import uvicorn
+from app.services.tratamento__vendedores import clean_sellers
+from app.routers import example_router
+from app.services.tratamento__produtos import clean_products
+
 
 app = FastAPI(title="API O-Market - Tratamento de Itens")
 
@@ -18,6 +23,27 @@ def get_clean_items(arquivo: str = "itens_pedidos.csv"):
     path_csv = f"data/{arquivo}"
     
     print(f"Buscando arquivo em: {path_csv}")
+@app.get("/health", description="Verifica a saúde da API.")
+async def health_check():
+    return {"status": "ok"}
+
+@app.get("/vendedores-tratados", description="Retorna base de vendedores tratada.")
+async def get_vendedores_tratados():
+    # Indico o caminho do arquivo CSV como parâmetro
+    caminho_csv = "/app/data/[Júlia] DataLake - vendedores.csv"
+    df_tratado = clean_sellers(caminho_csv)
+    # Retorno as primeiras 10 linhas para facilitar o teste e evitar sobrecarga
+    return df_tratado.head(10).to_dict(orient="records")
+
+app.include_router(example_router, prefix="/example", tags=["Example"])
+@app.get("/produtos-tratados", description="Retorna base de produtos tratada.")
+async def get_produtos_tratados():
+    caminho_csv = "/app/data/[Júlia] DataLake - produtos.csv"
+    df_tratado = clean_products(caminho_csv)
+    # Limita para as primeiras 10 linhas, igual ao endpoint de pedidos
+    return df_tratado.head(10).to_dict(orient="records")
+
+app.include_router(example_router, prefix="/example", tags=["Example"])
 
     try:
         # Chama a função de itens passando o caminho completo

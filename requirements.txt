@@ -15,4 +15,5 @@ typing-inspection==0.4.2
 uvicorn==0.38.0
 pandas==2.3.2
 numpy>=1.26.0
+Unidecode>=1.1.2
 
