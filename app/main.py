@@ -7,16 +7,7 @@ from app.routers import example_router
 from app.services.tratamento__produtos import clean_products
 from app.services.tratamento__pedidos import tratar_pedidos
 
-
-
-
-path_orders = "data/[Júlia] DataLake - pedidos.csv"
-path_products = "data/[Júlia] DataLake - produtos.csv"
-path_sellers = "data/[Júlia] DataLake - vendedores.csv"
-
-
-
-app = FastAPI(title="API O-Market - Tratamento de Itens")
+app = FastAPI(title="API O-Market - Tratamento de Dados")
 
 @app.get("/")
 def read_root():
@@ -26,45 +17,80 @@ def read_root():
 async def health_check():
     return {"status": "ok"}
 
+# --- ROTA PEDIDOS ---
 @app.get("/pedidos-tratados", description="Retorna base de pedidos tratada.")
-async def get_pedidos_tratados(skip: int = Query(0, ge=0), limit: int = Query(100, le=100)):
+async def get_pedidos_tratados(
+    arquivo: str = "[Júlia] DataLake - pedidos.csv",
+    skip: int = Query(0, ge=0), 
+    limit: int = Query(100, le=100)
+):
+    path_orders = f"data/{arquivo}"
+    try:
+        df_tratado = tratar_pedidos(path_orders)
+        return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
+    except Exception as e:
+        return {"status": "error", "message": f"Erro ao processar pedidos: {str(e)}"}
 
-    df_tratado = tratar_pedidos(path_orders)
-    return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
-
-app.include_router(example_router, prefix="/example", tags=["Example"])
-
+# --- ROTA VENDEDORES ---
 @app.get("/vendedores-tratados", description="Retorna base de vendedores tratada.")
-async def get_vendedores_tratados(skip: int = Query(0, ge=0), limit: int = Query(100, le=100)):
-    # Indico o caminho do arquivo CSV como parâmetro
-    df_tratado = clean_sellers(path_sellers)
-    # Retorno as primeiras 10 linhas para facilitar o teste e evitar sobrecarga
-    return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
+async def get_vendedores_tratados(
+    arquivo: str = "[Júlia] DataLake - vendedores.csv",
+    skip: int = Query(0, ge=0), 
+    limit: int = Query(100, le=100)
+):
+    path_sellers = f"data/{arquivo}"
+    try:
+        df_tratado = clean_sellers(path_sellers)
+        return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
+    except Exception as e:
+        return {"status": "error", "message": f"Erro ao processar vendedores: {str(e)}"}
 
+# --- ROTA PRODUTOS ---
 @app.get("/produtos-tratados", description="Retorna base de produtos tratada.")
-async def get_produtos_tratados(skip: int = Query(0, ge=0), limit: int = Query(100, le=100)):
-    df_tratado = clean_products(path_products)
-    # Limita para as primeiras 10 linhas, igual ao endpoint de pedidos
-    return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
+async def get_produtos_tratados(
+    arquivo: str = "[Júlia] DataLake - produtos.csv",
+    skip: int = Query(0, ge=0), 
+    limit: int = Query(100, le=100)
+):
+    path_products = f"data/{arquivo}"
+    try:
+        df_tratado = clean_products(path_products)
+        return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
+    except Exception as e:
+        return {"status": "error", "message": f"Erro ao processar produtos: {str(e)}"}
 
-# --- ROTA GET PARA ITENS PEDIDOS ---
-@app.get("/clean/items")
+# --- ROTA ITENS PEDIDOS (Com Integridade) ---
+@app.get("/clean/items", description="Retorna base de itens tratada com integridade referencial.")
 def get_clean_items(
-    arquivo: str = "[Júlia] DataLake - itens_pedidos.csv",
+    arquivo_itens: str = "[Júlia] DataLake - itens_pedidos.csv",
+    arquivo_pedidos: str = "[Júlia] DataLake - pedidos.csv",
+    arquivo_produtos: str = "[Júlia] DataLake - produtos.csv",
+    arquivo_vendedores: str = "[Júlia] DataLake - vendedores.csv",
     skip: int = Query(0, ge=0),
     limit: int = Query(100, le=100)
 ):
     """
-    Rota GET para limpar itens de pedidos.
-    O arquivo deve estar dentro da pasta 'data/'.
-    Permite paginação usando skip/limit.
+    Rota GET para limpar itens de pedidos com Integridade Referencial.
     """
-    path_csv = f"data/{arquivo}"
+    # Monta os caminhos completos
+    path_itens = f"data/{arquivo_itens}"
+    path_orders = f"data/{arquivo_pedidos}"
+    path_products = f"data/{arquivo_produtos}"
+    path_sellers = f"data/{arquivo_vendedores}"
+
     try:
-        df_limpo = tratar_itens_pedidos(path_csv)
-        # Paginação: retorna até 100 registros a partir de 'skip'
+        # Chama a função passando os 4 caminhos na ordem correta que definimos no serviço
+        df_limpo = tratar_itens_pedidos(
+            path_itens=path_itens, 
+            path_orders=path_orders, 
+            path_products=path_products, 
+            path_sellers=path_sellers
+        )
+        
+        # Aplica paginação e retorna
         return df_limpo.iloc[skip:skip+limit].to_dict("records")
+        
     except Exception as e:
-        return {"status": "error", "message": f"Erro ao ler {path_csv}: {str(e)}"}
+        return {"status": "error", "message": str(e)}
 
 app.include_router(example_router, prefix="/example", tags=["Example"])
