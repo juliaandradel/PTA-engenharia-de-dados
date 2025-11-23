@@ -1,93 +1,45 @@
-from fastapi import FastAPI
-from fastapi import Query
-# Imports dos arquivos separados
+from fastapi import FastAPI, HTTPException
+from typing import List, Dict, Any
+
+# Imports
 from app.services.tratamento__itens__pedidos import tratar_itens_pedidos
 from app.services.tratamento__vendedores import clean_sellers
-from app.routers import example_router
 from app.services.tratamento__produtos import clean_products
 from app.services.tratamento__pedidos import tratar_pedidos
 
-app = FastAPI(title="API O-Market - Tratamento de Dados Integrado")
+app = FastAPI(title="API O-Market (POST + Integridade)")
 
 @app.get("/")
 def read_root():
     return {"status": "API Online 🚀"}
 
-@app.get("/health")
-async def health_check():
-    return {"status": "ok"}
+# --- ROTAS POST (Recebem JSON, mas validam IDs localmente) ---
 
-# --- ROTA PEDIDOS (Agora exige itens para validar) ---
-@app.get("/pedidos-tratados")
-async def get_pedidos_tratados(
-    arquivo: str = "[Júlia] DataLake - pedidos.csv",
-    arquivo_itens: str = "[Júlia] DataLake - itens_pedidos.csv", # <--- Novo
-    skip: int = Query(0, ge=0), 
-    limit: int = Query(100, le=100)
-):
-    path_orders = f"data/{arquivo}"
-    path_items = f"data/{arquivo_itens}"
+@app.post("/clean/items")
+def post_clean_items(payload: List[Dict[str, Any]]):
     try:
-        # Passa os DOIS caminhos
-        df_tratado = tratar_pedidos(path_orders, path_items)
-        return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
+        # A função tratar_itens_pedidos vai ler os CSVs locais para validar integridade
+        return tratar_itens_pedidos(payload)
     except Exception as e:
-        return {"status": "error", "message": f"Erro ao processar pedidos: {str(e)}"}
+        raise HTTPException(status_code=500, detail=str(e))
 
-# --- ROTA VENDEDORES (Agora exige itens para validar) ---
-@app.get("/vendedores-tratados")
-async def get_vendedores_tratados(
-    arquivo: str = "[Júlia] DataLake - vendedores.csv",
-    arquivo_itens: str = "[Júlia] DataLake - itens_pedidos.csv", # <--- Novo
-    skip: int = Query(0, ge=0), 
-    limit: int = Query(100, le=100)
-):
-    path_sellers = f"data/{arquivo}"
-    path_items = f"data/{arquivo_itens}"
+@app.post("/clean/orders")
+def post_clean_orders(payload: List[Dict[str, Any]]):
     try:
-        # Passa os DOIS caminhos
-        df_tratado = clean_sellers(path_sellers, path_items)
-        return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
+        return tratar_pedidos(payload)
     except Exception as e:
-        return {"status": "error", "message": f"Erro ao processar vendedores: {str(e)}"}
+        raise HTTPException(status_code=500, detail=str(e))
 
-# --- ROTA PRODUTOS (Agora exige itens para validar) ---
-@app.get("/produtos-tratados")
-async def get_produtos_tratados(
-    arquivo: str = "[Júlia] DataLake - produtos.csv",
-    arquivo_itens: str = "[Júlia] DataLake - itens_pedidos.csv", # <--- Novo
-    skip: int = Query(0, ge=0), 
-    limit: int = Query(100, le=100)
-):
-    path_products = f"data/{arquivo}"
-    path_items = f"data/{arquivo_itens}"
+@app.post("/clean/products")
+def post_clean_products(payload: List[Dict[str, Any]]):
     try:
-        # Passa os DOIS caminhos
-        df_tratado = clean_products(path_products, path_items)
-        return df_tratado.iloc[skip:skip+limit].to_dict(orient="records")
+        return clean_products(payload)
     except Exception as e:
-        return {"status": "error", "message": f"Erro ao processar produtos: {str(e)}"}
+        raise HTTPException(status_code=500, detail=str(e))
 
-# --- ROTA ITENS PEDIDOS 
-@app.get("/clean/items")
-def get_clean_items(
-    arquivo_itens: str = "[Júlia] DataLake - itens_pedidos.csv",
-    arquivo_pedidos: str = "[Júlia] DataLake - pedidos.csv",
-    arquivo_produtos: str = "[Júlia] DataLake - produtos.csv",
-    arquivo_vendedores: str = "[Júlia] DataLake - vendedores.csv",
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, le=100)
-):
-    path_itens = f"data/{arquivo_itens}"
-    path_orders = f"data/{arquivo_pedidos}"
-    path_products = f"data/{arquivo_produtos}"
-    path_sellers = f"data/{arquivo_vendedores}"
-
+@app.post("/clean/sellers")
+def post_clean_sellers(payload: List[Dict[str, Any]]):
     try:
-        # Chama a função passando os 4 caminhos
-        df_limpo = tratar_itens_pedidos(path_itens, path_orders, path_products, path_sellers)
-        return df_limpo.iloc[skip:skip+limit].to_dict("records")
+        return clean_sellers(payload)
     except Exception as e:
-        return {"status": "error", "message": str(e)}
-
-app.include_router(example_router, prefix="/example", tags=["Example"])
+        raise HTTPException(status_code=500, detail=str(e))
