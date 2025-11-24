@@ -6,40 +6,37 @@ from app.services.tratamento__itens__pedidos import tratar_itens_pedidos
 from app.services.tratamento__vendedores import clean_sellers
 from app.services.tratamento__produtos import clean_products
 from app.services.tratamento__pedidos import tratar_pedidos
+from app.memory import clear_memory
 
-app = FastAPI(title="API O-Market (POST + Integridade)")
+app = FastAPI(title="API O-Market (Final)")
 
 @app.get("/")
 def read_root():
     return {"status": "API Online 🚀"}
 
-# --- ROTAS POST (Recebem JSON, mas validam IDs localmente) ---
+# --- ROTA DE RESET (Início do n8n) ---
+@app.post("/reset-memory")
+def post_reset_memory():
+    clear_memory()
+    return {"status": "Memória limpa."}
+
+# --- ROTAS DE TRATAMENTO (POST) ---
+@app.post("/pedidos-tratados")
+def post_pedidos(payload: List[Dict[str, Any]]):
+    try: return tratar_pedidos(payload)
+    except Exception as e: raise HTTPException(500, str(e))
+
+@app.post("/produtos-tratados")
+def post_produtos(payload: List[Dict[str, Any]]):
+    try: return clean_products(payload)
+    except Exception as e: raise HTTPException(500, str(e))
+
+@app.post("/vendedores-tratados")
+def post_vendedores(payload: List[Dict[str, Any]]):
+    try: return clean_sellers(payload)
+    except Exception as e: raise HTTPException(500, str(e))
 
 @app.post("/clean/items")
-def post_clean_items(payload: List[Dict[str, Any]]):
-    try:
-        # A função tratar_itens_pedidos vai ler os CSVs locais para validar integridade
-        return tratar_itens_pedidos(payload)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/clean/orders")
-def post_clean_orders(payload: List[Dict[str, Any]]):
-    try:
-        return tratar_pedidos(payload)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/clean/products")
-def post_clean_products(payload: List[Dict[str, Any]]):
-    try:
-        return clean_products(payload)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/clean/sellers")
-def post_clean_sellers(payload: List[Dict[str, Any]]):
-    try:
-        return clean_sellers(payload)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def post_items(payload: List[Dict[str, Any]]):
+    try: return tratar_itens_pedidos(payload)
+    except Exception as e: raise HTTPException(500, str(e))
