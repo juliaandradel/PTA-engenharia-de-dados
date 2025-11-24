@@ -3,29 +3,20 @@ from unidecode import unidecode
 from app.memory import valid_seller_ids
 
 def clean_sellers(dados: list):
-    print("Iniciando Vendedores (Limpeza + Memória)...")
     df = pd.DataFrame(dados)
     if df.empty: return []
 
-    # --- TRATAMENTO DE DADOS ---
-
-    # 1. Cidade: Remove acentos e coloca em MAIÚSCULO
+    # Nível 1: Geografia
     if 'seller_city' in df.columns:
-        def tratar_texto(txt):
-            if pd.isna(txt): return ""
-            return unidecode(str(txt)).upper()
-            
-        df['seller_city'] = df['seller_city'].apply(tratar_texto)
-
-    # 2. Estado: Coloca em MAIÚSCULO
+        df['seller_city'] = df['seller_city'].astype(str).apply(lambda x: unidecode(x).upper())
     if 'seller_state' in df.columns:
         df['seller_state'] = df['seller_state'].astype(str).str.upper()
 
-    # --- GESTÃO DE MEMÓRIA ---
+    # Nível 2: Salvar na Memória
     if 'seller_id' in df.columns:
-        ids_unicos = set(df['seller_id'].astype(str).unique())
-        valid_seller_ids.update(ids_unicos)
-        print(f"💾 {len(ids_unicos)} Vendedores salvos na memória.")
+        ids = set(df['seller_id'].astype(str).unique())
+        valid_seller_ids.update(ids)
+        print(f"💾 Memória: {len(ids)} Vendedores carregados.")
 
     df = df.replace({float('nan'): None})
     return df.to_dict("records")
