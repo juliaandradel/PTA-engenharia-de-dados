@@ -64,4 +64,4 @@ def rodar_carga_inicial():
     print("\n🏁 CARGA INICIAL CONCLUÍDA! Arquivos '_tratados.csv' gerados na pasta data/.")
 
 if __name__ == "__main__":
-    rodar_carga_inicial()
+    rodar_carga_inicial()python carga_inicial.py

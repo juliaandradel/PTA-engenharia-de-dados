@@ -1,16 +1,23 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
- <a href="https://github.com/CITi-UFPE/PTA-engenharia-de-dados">
-   <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4zWbC3U-G_vTTZE6rUQqJjzL8u7WNZjzhEaYi9z7slJn8vNhgnFVootxjm377GVCdPGY_F64WolHmGJ" alt="Logo" width="180px">
- </a>
- <h3 align="center">PTA Engenharia de Dados</h3>
- <p align="center">
- Projeto criado em 2025.2 para a frente de engenharia de dados no Processo de Treinamento de Área (PTA) do CITi. Seguimos práticas modernas e visamos capacitação técnica alinhada às demandas reais da empresa.<br>
- <a href="https://github.com/CITi-UFPE/PTA-engenharia-de-dados"><strong>Explore the docs »</strong></a><br><br>
-   · <a href="https://github.com/CITi-UFPE/PTA-engenharia-de-dados/issues">Report Bug</a>
-   · <a href="https://github.com/CITi-UFPE/PTA-engenharia-de-dados/issues">Request Feature</a>
- </p>
+  <a href="https://github.com/CITi-UFPE/PTA-engenharia-de-dados">
+    <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4zWbC3U-G_vTTZE6rUQqJjzL8u7WNZjzhEaYi9z7slJn8vNhgnFVootxjm377GVCdPGY_F64WolHmGJ" alt="Logo" width="180px">
+  </a>
+
+  <h3 align="center">PTA Engenharia de Dados</h3>
+
+  <p align="center"
+  Este projeto foi criado em 2025.2 com a proposta de trazer a frente de engenharia de dados para o Processo de Treinamento de Área (PTA) do CITi. Ele foi desenvolvido com base em práticas modernas de engenharia de dados e tem como objetivo capacitar tecnicamente as pessoas aspirantes, alinhando-se às demandas atuais da empresa.
+    <br />
+    <a href="https://github.com/CITi-UFPE/PTA-engenharia-de-dados"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    ·
+    <a href="https://github.com/CITi-UFPE/PTA-engenharia-de-dados/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/CITi-UFPE/PTA-engenharia-de-dados/issues">Request Feature</a>
+  </p>
 </p>
 
 
